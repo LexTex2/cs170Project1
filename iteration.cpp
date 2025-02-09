@@ -9,6 +9,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         node childNode = quickUse;
         swap(childNode.puzzle[childNode.row - 1][childNode.col], childNode.puzzle[childNode.row][childNode.col]);
         //update heurist for A* functs later
+        setHeuristic(childNode);
         childNode.row -= 1;
         childNode.depth += 1;
         if (isNewNode(childNode))   {
@@ -20,6 +21,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         node childNode = quickUse;
         swap(childNode.puzzle[childNode.row + 1][childNode.col], childNode.puzzle[childNode.row][childNode.col]);
         //update heurist for A* functs later
+        setHeuristic(childNode);
         childNode.row += 1;
         childNode.depth += 1;
         if (isNewNode(childNode))   {
@@ -31,6 +33,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         node childNode = quickUse;
         swap(childNode.puzzle[childNode.row][childNode.col + 1], childNode.puzzle[childNode.row][childNode.col]);
         //update heurist for A* functs later
+        setHeuristic(childNode);
         childNode.depth += 1;
         childNode.col += 1;
         if (isNewNode(childNode))   {
@@ -42,6 +45,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         node childNode = quickUse;
         swap(childNode.puzzle[childNode.row][childNode.col - 1], childNode.puzzle[childNode.row][childNode.col]);
         //update heurist for A* functs later
+        setHeuristic(childNode);
         childNode.depth += 1;
         childNode.col -= 1;
         if (isNewNode(childNode))   {
@@ -56,14 +60,14 @@ void algoIteration::explore()   {
     bool solutionFound = false;
 
     while (!solutionFound && rawPush.size() > 0)   {
-        if (rawPush.size() > nodesTotal)   {
-            nodesTotal = rawPush.size();
-        }
         currentNode = rawPush.top();                    //fetch top of priority q
+        setHeuristic(currentNode);
         viewProgress(currentNode, solutionFound);       //so we can see whats happening!
         oldNodes.push_back(currentNode);                //save used nodes to avoid repeat loops
+        if (rawPush.size() > mostNodes)   {
+            mostNodes = rawPush.size();
+        }
         rawPush.pop();                                  //remove node just visited in priority q
-
         if (currentNode == endState)   {
             cout << "solution found!" << endl;
             cout << "final depth: ";
@@ -81,38 +85,49 @@ void algoIteration::explore()   {
     }
 }
 void algoIteration::viewProgress(const node printme, bool finalMatrix)  {
+    for(int j = 0; j < 3; j++)   {  
+        cout << endl; 
+        for(int i = 0; i < 3; i++)   {
+           cout << printme.puzzle[j][i] << "   ";
+        }
+    } 
+    cout << endl;
     if (!finalMatrix)   {
         cout << "current depth g(n): " << printme.depth << endl;
         cout << "h(n): " << printme.heuristic << endl;
     }
     else {
         cout << "final depth g(n): " << printme.depth << endl;
-    }
-    for(int j = 0; j < 3; j++)   {  
-        cout << endl; 
-        for(int i = 0; i < 3; i++)   {
-           cout << printme.puzzle[j][i] << "   ";
-        }
+        cout << "final heuristic h(n): " << printme.heuristic << endl;
     }
     cout << endl;
 }
 
-void algoIteration::setHeuristic(node getHeur)   {
+void algoIteration::setHeuristic(node &getHeur)   {
     if (algoPicked == 1)   {
         getHeur.heuristic = 0;
     }
-    //add others later
+    if (algoPicked == 2)   {
+        int count = 0;
+        for (int j = 0; j < 3; j++)   {
+            for (int i = 0; i < 3; i++)   {
+                if (getHeur.puzzle[j][i] != endState.puzzle[j][i])   {
+                    count++;
+                }
+            }
+        }
+       getHeur.heuristic = count; 
+    }
+    if (algoPicked == 3)   {
+
+    }
 }
 algoIteration::algoIteration(int userChoice, int startMatrix[3][3])   {
-    algoPicked = userChoice;
-    if (algoPicked == 1)   {
-        orig.heuristic = 0;
-    }
-    
+    algoPicked = userChoice;    
     setInit(startMatrix);
     setHeuristic(orig);
     orig.depth = 0;
-    nodesTotal = 0;
+    mostNodes = 0;
     setSolution();
 }
 
