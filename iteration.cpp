@@ -12,6 +12,8 @@ void algoIteration::findChildren(const node &searchNode)   {
         setHeuristic(childNode);
         childNode.row -= 1;
         childNode.depth += 1;
+        childNode.parentNode = oldNodes.size() - 1;
+        //cout << oldNodes.size()-1 << endl;
         if (isNewNode(childNode))   {
             rawPush.push(childNode);
         }
@@ -24,6 +26,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         setHeuristic(childNode);
         childNode.row += 1;
         childNode.depth += 1;
+        childNode.parentNode = oldNodes.size() - 1;
         if (isNewNode(childNode))   {
             rawPush.push(childNode);
         }
@@ -36,6 +39,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         setHeuristic(childNode);
         childNode.depth += 1;
         childNode.col += 1;
+        childNode.parentNode = oldNodes.size() - 1;
         if (isNewNode(childNode))   {
             rawPush.push(childNode);
         }
@@ -48,6 +52,7 @@ void algoIteration::findChildren(const node &searchNode)   {
         setHeuristic(childNode);
         childNode.depth += 1;
         childNode.col -= 1;
+        childNode.parentNode = oldNodes.size() - 1;
         if (isNewNode(childNode))   {
             rawPush.push(childNode);
         }
@@ -62,8 +67,8 @@ void algoIteration::explore()   {
     while (!solutionFound && rawPush.size() > 0)   {
         currentNode = rawPush.top();                    //fetch top of priority q
         setHeuristic(currentNode);
-        viewProgress(currentNode, solutionFound);       //so we can see whats happening!
         oldNodes.push_back(currentNode);                //save used nodes to avoid repeat loops
+        //viewProgress(currentNode, solutionFound);       //so we can see whats happening! (for testing)
         if (rawPush.size() > mostNodes)   {
             mostNodes = rawPush.size();
         }
@@ -71,6 +76,7 @@ void algoIteration::explore()   {
         if (currentNode == endState)   {
             cout << "solution found!" << endl;
             cout << "final depth: ";
+            endState = currentNode;
             cout << currentNode.depth << endl;  
             solutionFound = true;
             break;
@@ -84,21 +90,25 @@ void algoIteration::explore()   {
 
     }
 }
-void algoIteration::viewProgress(const node printme, bool finalMatrix)  {
+
+void algoIteration::viewProgress(node &printme, bool finalMatrix)  {       //ouput node/matrix function
     for(int j = 0; j < 3; j++)   {  
         cout << endl; 
         for(int i = 0; i < 3; i++)   {
            cout << printme.puzzle[j][i] << "   ";
         }
     } 
+
     cout << endl;
     if (!finalMatrix)   {
         cout << "current depth g(n): " << printme.depth << endl;
         cout << "h(n): " << printme.heuristic << endl;
+        cout << "parentIndec: " << printme.parentNode << endl;
     }
     else {
         cout << "final depth g(n): " << printme.depth << endl;
         cout << "final heuristic h(n): " << printme.heuristic << endl;
+        cout << " final parentIndec: " << printme.parentNode << endl;
     }
     cout << endl;
 }
@@ -145,7 +155,6 @@ void algoIteration::setHeuristic(node &getHeur)   {
     }
 }
 
-
 double algoIteration::euclideanMath(int x, int y)   {
     return sqrt(pow(x, 2) + pow(y, 2));
 }
@@ -156,6 +165,7 @@ algoIteration::algoIteration(int userChoice, int startMatrix[3][3])   {
     setHeuristic(orig);
     orig.depth = 0;
     mostNodes = 0;
+    orig.parentNode = 0;
     setSolution();
 }
 
@@ -190,4 +200,41 @@ bool algoIteration::isNewNode(const node &searchNode)   {
             }
     }
     return true;
+}
+
+void algoIteration::viewOptSolution()   {
+    int totalTraversed, totalNodes = 0;
+    
+    node backThrough;
+    backThrough = endState;
+    solutionOutput.push(backThrough);           
+
+    // while (!oldNodes.empty())                   //will count total number of nodes explored (in place of time)
+    // {
+    //     oldNodes.pop_back();
+    //     ++totalTraversed;
+    // }
+    
+    totalNodes++;
+    while (!(backThrough == orig))
+    {   
+        backThrough = oldNodes.at(backThrough.parentNode);
+        solutionOutput.push(backThrough);
+        ++totalNodes;
+    }
+    cout << "Solution Path: " << endl;
+
+    node temp;
+    bool holdF = false;
+    while (!solutionOutput.empty())            //will ouput node as we backtrack through our solution via stack
+    {
+        temp = solutionOutput.top();
+        viewProgress(temp, holdF);
+        solutionOutput.pop();
+    }
+
+    cout << endl;
+    cout << "Max nodes in priority queue: " << mostNodes << endl;
+    cout << "Total nodes visited: " << totalNodes << endl;
+    cout << "Total nodes in solution: " << totalTraversed << endl;
 }
