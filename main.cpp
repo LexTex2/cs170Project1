@@ -13,7 +13,7 @@ int main() {
 
    
     int choice;
-    cout << "Input '1' for Uniform Cost Search and '2' for Missing Tile: \n";
+    cout << "Input '1' for Uniform Cost Search and '2' for Missing Tile and '3' for Manhattan Distance: \n";
     cin >> choice;
     cout << endl;
 

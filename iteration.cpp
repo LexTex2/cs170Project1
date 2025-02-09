@@ -119,9 +119,37 @@ void algoIteration::setHeuristic(node &getHeur)   {
        getHeur.heuristic = count; 
     }
     if (algoPicked == 3)   {
+        double aproxDistance = 0.0;
+        int x = 0;
+        int y = 0;
+        
+        for (int k = 0; k < 3; k++)   {
+            for (int l = 0; l < 3; l++)   {
 
+                if (getHeur.puzzle[k][l] != endState.puzzle[k][l])  {
+
+                    for (int j = 0; j < 3; j++)   {
+                        for (int i = 0; i < 3; i++)   {
+                                if(getHeur.puzzle[k][l] == endState.puzzle[j][i])   {
+                                    x = j;
+                                    y = i;
+                                    break;
+                                }
+                        }
+                    }
+                    aproxDistance += euclideanMath(k-x, l-y);
+                }
+            }
+        }
+        getHeur.heuristic = aproxDistance;
     }
 }
+
+
+double algoIteration::euclideanMath(int x, int y)   {
+    return sqrt(pow(x, 2) + pow(y, 2));
+}
+
 algoIteration::algoIteration(int userChoice, int startMatrix[3][3])   {
     algoPicked = userChoice;    
     setInit(startMatrix);

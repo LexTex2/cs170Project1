@@ -72,7 +72,7 @@ class algoIteration   {
         void viewProgress(node currMatrix, bool finalMatrix);    // will print out depth/ matrix' for tracking n testing
         void setHeuristic(node &getHeur);                         //set heuristic val for seperate algos
         void setInit(int tempArray[3][3]);                       //move initial matrix into node type
-
+        double euclideanMath(int x, int y);                      //function to do math (cleaner to see)
 
 
 
